@@ -1,0 +1,39 @@
+# Build directory
+build/
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+CTestTestfile.cmake
+Testing/
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Linux binaries
+DSU_Strike
+
+# Object files
+*.o
+*.obj
+
+# Static/Dynamic libraries
+*.a
+*.so
+*.dll
+*.dylib
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Vim
+*.swp
+*.swo
