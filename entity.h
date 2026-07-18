@@ -11,8 +11,6 @@ class Entity
     std::string m_tag = "default";
     bool m_alive = true;
 
-
-    public:
     // pvt constructor
     Entity () {}
     Entity (const size_t id,const std::string &tag)
@@ -21,8 +19,9 @@ class Entity
     {
 
     }
+    friend class EntityManager;
 
-
+public:
     // pointers to the component
     std::shared_ptr<CTransform> cTransform;
     std::shared_ptr<CShape> cShape;

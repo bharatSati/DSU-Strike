@@ -1,19 +1,21 @@
 #include "Vec2.h"
 #include "entity.h"
+#include "entityManager.h"
 #include <iostream>
 
 
 int main() {
 
-    Entity e1(1,"bharat");
-
-    e1.cLifespan = std::make_shared<CLifespan>(10);
-
-    auto it = std::make_shared<Entity> (2,"hello");
-
-    it->cLifespan = std::make_shared<CLifespan>(20);
     
-    std::cout << e1.cLifespan->total + it->cLifespan->total << std::endl;
+    EntityManager entities;
+    entities.addEntity("bharat");
+    entities.update();
+
+    EntityVector vec = entities.getEntities(); 
+    std::cout << vec.size() << std::endl;
+    for(auto it : vec) std::cout << it -> tag() << std::endl;
+
+
     
 
 }

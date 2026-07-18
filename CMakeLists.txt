@@ -11,6 +11,7 @@ add_executable(dsu_strike
     game.cpp
     Vec2.cpp
     entity.cpp
+    entityManager.cpp
 )
 
 target_include_directories(dsu_strike PRIVATE .)
