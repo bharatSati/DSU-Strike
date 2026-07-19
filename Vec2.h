@@ -26,7 +26,6 @@ public:
     
     Vec2& normalize ();
 
-
-     
+    Vec2& scale (float scalar);
 
 };

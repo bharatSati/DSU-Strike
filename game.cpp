@@ -91,21 +91,11 @@ void Game::run()
     while(m_running)
     {
         m_entities.update();
+
    
         sEnemySpawner();
         
-        
-
-
-        while (const std::optional event = m_window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>())
-            {
-                m_window.close();
-                m_running = false;
-            }
-        }
-
+        sUserInput();
         sMovement();
         sEnemySpawner();
 
@@ -157,10 +147,57 @@ void Game::spawnEnemy()
 }
 
 
+void Game::spawnBullet()
+{
+    
+
+}
+
+
 void Game::sMovement ()
 {
     float w = m_window.getSize().x;
     float h = m_window.getSize().y;
+
+    // we dont want a uniform speed or sunifrom shift
+    // we want a jerk
+    // thus at every frame off the velocity, if previously provides
+    m_player -> cTransform -> velocity = { 0.0f , 0.0f };
+
+
+    // handle input instructions
+    if(m_player -> cInput -> up)
+    {
+        m_player -> cTransform -> velocity.y = -5;
+    }
+    if(m_player -> cInput -> down)
+    {
+        m_player -> cTransform -> velocity.y = 5;
+    }
+    if(m_player -> cInput -> left)
+    {
+        m_player -> cTransform -> velocity.x = -5;
+    }
+    if(m_player -> cInput -> right)
+    {
+        m_player -> cTransform -> velocity.x = 5;
+    }
+
+    // if goes out of bound handle it
+    float nx = m_player -> cTransform -> position.x + m_player -> cTransform -> velocity.x;
+    float ny = m_player -> cTransform -> position.y + m_player -> cTransform -> velocity.y;
+    float err = m_player -> cShape -> shape.getRadius() + 
+                m_player -> cShape -> shape.getOutlineThickness();
+    if(nx - err <= 0) nx = err;
+    if(nx + err >= w) nx = w - err;
+    if(ny + err >= h) ny = h - err;
+    if(ny - err <= 0) ny = err;
+
+
+    m_player -> cTransform -> position = { nx , ny };
+    
+   
+
 
     for(auto &e : m_entities.getEntities())
     {
@@ -214,5 +251,75 @@ void Game::sRender()
     }
 
     m_window.display();
+
+}
+
+
+
+void Game::sUserInput ()
+{
+    // handling events here
+    while(const std::optional event = m_window.pollEvent())
+    {
+        if(event -> is <sf::Event::Closed>())
+        {
+            m_window.close();
+            m_running = 0;
+        }
+
+        const auto* key = event -> getIf <sf::Event::KeyPressed>();
+        if(key && key -> code == sf::Keyboard::Key::E)
+        {
+            m_window.close();
+            m_running = 0;
+        }
+        if(key && key -> code == sf::Keyboard::Key::Up)
+        {
+            m_player -> cInput -> up = 1;
+        }
+        else if(key && key -> code == sf::Keyboard::Key::Down)
+        {
+            m_player -> cInput -> down = 1;
+        }
+        else if(key && key -> code == sf::Keyboard::Key::Left)
+        {
+            m_player -> cInput -> left = 1;
+        }
+        else if(key && key -> code == sf::Keyboard::Key::Right)
+        {
+            m_player -> cInput -> right = 1;
+        }
+
+
+
+
+
+        const auto* keyy = event -> getIf <sf::Event::KeyReleased>();
+        if(keyy && keyy -> code == sf::Keyboard::Key::Up)
+        {
+            m_player -> cInput -> up = 0;
+        }
+        else if(keyy && keyy -> code == sf::Keyboard::Key::Down)
+        {
+            m_player -> cInput -> down = 0;
+        }
+        else if(keyy && keyy -> code == sf::Keyboard::Key::Left)
+        {
+            m_player -> cInput -> left = 0;
+        }
+        else if(keyy && keyy -> code == sf::Keyboard::Key::Right)
+        {
+            m_player -> cInput -> right = 0;
+        }
+
+
+    }
+
+
+
+
+
+
+    
 
 }

@@ -100,3 +100,11 @@ Vec2& Vec2::normalize ()
     }
     return *this;
 }
+
+
+Vec2& Vec2::scale (float scalar)
+{
+    x = 1.0f * x * scalar;
+    y = 1.0f * y * scalar;
+    return *this;
+}
