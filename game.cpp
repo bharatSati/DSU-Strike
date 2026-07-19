@@ -98,6 +98,7 @@ void Game::run()
         sUserInput();
         sMovement();
         sEnemySpawner();
+        sBulletSpawner();
 
         sRender();
         m_currentFrame++;
@@ -124,7 +125,7 @@ void Game::spawnPlayer()
 
 void Game::sEnemySpawner ()
 {
-    if(m_currentFrame - m_lastEnemeySpawnTime >= 240) spawnEnemy();
+    if(m_currentFrame - m_lastEnemySpawnTime >= 240) spawnEnemy();
 }
 
 void Game::spawnEnemy()
@@ -142,16 +143,44 @@ void Game::spawnEnemy()
 
     // no input component needed for enemy
 
-    m_lastEnemeySpawnTime = m_currentFrame;
+    m_lastEnemySpawnTime = m_currentFrame;
 
 }
 
 
-void Game::spawnBullet()
+void Game::spawnBullet(std::shared_ptr<Entity> &source, Vec2 &target)
 {
-    
+    // source is the our player which generated the bullet
+    // target is the mouse pointer
+
+    // find unit vector in direction of final - initial
+    // then multiply the magnitude of speed to it
+    auto e = m_entities.addEntity("bullet");
+    Vec2 vel = target - source -> cTransform -> position;
+    vel.normalize().scale(25);
+
+    e -> cTransform = std::make_shared<CTransform> (source -> cTransform -> position , vel , 0.0);
+    e -> cShape = std::make_shared<CShape> (15, sf::Color(255,255,255), 20, sf::Color(220,220,220), 1);
+    // for bullet we need to it to fade out and thus remove after some number of frame
+    e -> cLifespan = std::make_shared<CLifespan> (20);
 
 }
+
+void Game::sBulletSpawner ()
+{
+    for(auto &it : m_entities.getEntityMap()["bullet"])
+    {
+        it -> cLifespan -> remaining -= 1;
+        float num = it -> cLifespan -> remaining;
+        float deno = it -> cLifespan -> total;
+        float alpha =  num / deno * 255.0f;
+        // std::cout << alpha << std::endl;
+        it -> cShape -> shape.setFillColor(sf::Color(255,255,255,alpha));
+        
+    }
+
+}
+
 
 
 void Game::sMovement ()
@@ -310,6 +339,13 @@ void Game::sUserInput ()
         else if(keyy && keyy -> code == sf::Keyboard::Key::Right)
         {
             m_player -> cInput -> right = 0;
+        }
+
+        const auto mouse = event -> getIf <sf::Event::MouseButtonPressed>();
+        if(mouse && mouse -> button == sf::Mouse::Button::Left)
+        {
+            Vec2 source = { (float) mouse -> position.x , (float)mouse -> position.y };
+            spawnBullet(m_player, source);
         }
 
 

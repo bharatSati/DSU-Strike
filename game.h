@@ -67,7 +67,7 @@ class Game
     BulletConfig m_bulletConfig;
     int m_score = 0;
     int m_currentFrame = 0;
-    int m_lastEnemeySpawnTime = 0;
+    int m_lastEnemySpawnTime = 0;
     bool m_paused = 0;
     bool m_running = 1;
 
@@ -78,6 +78,7 @@ class Game
 
     void sMovement ();
     void sUserInput ();
+    void sBulletSpawner ();
     void sLifespan ();
     void sRender ();
     void sEnemySpawner ();
@@ -90,6 +91,7 @@ public:
 
     void run ();
     void spawnPlayer ();
+    void spawnBullet (std::shared_ptr<Entity> &e, Vec2 &target);
     void spawnEnemy ();
     void spawnsmallEnemey ();
     

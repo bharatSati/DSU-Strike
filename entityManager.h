@@ -23,8 +23,8 @@ public:
 
     size_t totalCreated ();
 
-    const EntityVector& getEntities () const;
+    EntityVector& getEntities ();
 
-    const EntityMap& getEntityMap () const;
+    EntityMap& getEntityMap ();
 
 };

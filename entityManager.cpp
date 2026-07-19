@@ -62,12 +62,12 @@ size_t EntityManager::totalCreated ()
 }
 
 
-const EntityVector& EntityManager::getEntities () const
+EntityVector& EntityManager::getEntities ()
 {
     return m_entities;
 }
 
-const EntityMap& EntityManager::getEntityMap () const
+EntityMap& EntityManager::getEntityMap ()
 {
     return m_entityMap;
 }
