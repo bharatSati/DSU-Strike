@@ -1,19 +1,22 @@
 #include "Vec2.h"
 #include "entity.h"
-#include "entityManager.h"
+#include "game.h"
 #include <iostream>
-
+#include <ctime>
 
 int main() {
 
-    
-    EntityManager entities;
-    entities.addEntity("bharat");
-    entities.update();
+    srand(time(nullptr));
+    // EntityManager entities;
+    // entities.addEntity("bharat");
+    // entities.update();
 
-    EntityVector vec = entities.getEntities(); 
-    std::cout << vec.size() << std::endl;
-    for(auto it : vec) std::cout << it -> tag() << std::endl;
+    // EntityVector vec = entities.getEntities(); 
+    // std::cout << vec.size() << std::endl;
+    // for(auto it : vec) std::cout << it -> tag() << std::endl;
+
+    Game g("config.txt");
+    g.run();
 
 
     
