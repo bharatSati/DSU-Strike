@@ -2,6 +2,8 @@
 #include <fstream>
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <math.h>
+
 
 
 Game::Game (const std::string &config)
@@ -138,7 +140,14 @@ void Game::spawnEnemy()
     float px = rand() % (cx - 100) + 50;
     float py = rand() % (cy - 100) + 50;
 
-    e -> cTransform = std::make_shared<CTransform> (Vec2(px, py), Vec2(5,5), 0.0f );
+    // give it a random angle
+    float angle = rand() % (360) + 1;
+    float pi = 3.140;
+    angle = (angle * pi)/180;
+    float vx = 5 * std::cos(angle);
+    float vy = 5 * std::sin(angle);
+
+    e -> cTransform = std::make_shared<CTransform> (Vec2(px, py), Vec2(vx,vy), 0.0f );
     e -> cShape = std::make_shared<CShape> (50, sf::Color(255,255,255), 3, sf::Color(220,220,220), 12);
 
     // no input component needed for enemy
@@ -165,6 +174,59 @@ void Game::spawnBullet(std::shared_ptr<Entity> &source, Vec2 &target)
     e -> cLifespan = std::make_shared<CLifespan> (20);
 
 }
+
+
+void Game::sSmallEnemySpawner (std::shared_ptr<Entity> &enemy)
+{
+    // whenever a bullet hits enemy, some clones are geberated
+    // their appearance and disappearance is handled by lifespan system
+    // here we are just generating them
+
+    // each clone is generated along each side
+    // we have angle as well as magnitude
+
+    // details of parent
+    int sides = enemy -> cShape -> shape.getPointCount();
+    float speed = enemy -> cTransform -> velocity.distance(Vec2 (0,0));
+    sf::Color fillColor = enemy -> cShape -> shape.getFillColor();
+    sf::Color outlineColor = enemy -> cShape -> shape.getOutlineColor();
+    float r = enemy -> cShape -> shape.getRadius();
+    float t = enemy -> cShape -> shape.getOutlineThickness();
+
+    r = r/2,t = t/2;
+
+
+    float pi = 3.14159265f;
+    float baseAngle = 360 / sides;
+    float temp = 0;
+    for(int i = 1; i <= sides; i++)
+    {
+        float vx = std::cos( (pi * temp)/180 * speed );
+        float vy = std::sin( (pi * temp)/180 * speed );
+        auto e = m_entities.addEntity("smallenemy");
+        e -> cTransform = std::make_shared<CTransform> (
+            enemy -> cTransform -> position,
+            Vec2(vx , vy),
+            0.0f
+        );
+
+        e -> cShape = std::make_shared<CShape> (
+            r ,
+            fillColor ,
+            sides ,
+            outlineColor ,
+            t
+        );
+
+        e -> cLifespan = std::make_shared<CLifespan> (120);
+        
+        temp += baseAngle;
+    }
+
+    enemy -> destroy();
+}
+
+
 
 void Game::sBulletSpawner ()
 {
@@ -307,7 +369,7 @@ void Game::sCollisions ()
             {
                 // collision detected
                 // remove this enemy and break out of this enemy loop
-                enemy -> destroy();
+                sSmallEnemySpawner(enemy);
                 break;
             }
         }

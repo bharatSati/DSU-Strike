@@ -82,6 +82,7 @@ class Game
     void sLifespan ();
     void sRender ();
     void sEnemySpawner ();
+    void sSmallEnemySpawner (std::shared_ptr<Entity> &enemy);
     void sCollisions ();
 
 public:
