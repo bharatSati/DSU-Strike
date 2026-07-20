@@ -99,7 +99,7 @@ void Game::run()
         sMovement();
         sEnemySpawner();
         sBulletSpawner();
-
+        sCollisions();
         sRender();
         m_currentFrame++;
     }
@@ -181,6 +181,8 @@ void Game::sBulletSpawner ()
 
 }
 
+ 
+
 
 
 void Game::sMovement ()
@@ -255,6 +257,60 @@ void Game::sMovement ()
         e -> cShape -> shape.setPosition( { newX , newY } );
         
         
+    }
+
+}
+
+
+void Game::sCollisions ()
+{
+
+    float x = m_player -> cTransform -> position.x;
+    float y = m_player -> cTransform -> position.y;
+    float r = m_player -> cShape -> shape.getRadius(); 
+    // if some enemy hits me, i should be spawned again and old player should be removed
+    for(auto &enemy : m_entities.getEntityMap()["enemy"])
+    {
+        float x1 = enemy -> cTransform -> position.x;
+        float y1 = enemy -> cTransform -> position.y;
+        float r1 = enemy -> cShape -> shape.getRadius();
+
+        if( (x - x1)*(x - x1) + (y - y1)*(y - y1) <= (r + r1)*(r + r1))
+        {
+            // collision detected between player and enemy
+            // remove current player and sspawn it again
+            m_player -> destroy();
+            spawnPlayer();
+            break;
+        }
+    }
+
+
+
+
+
+    // handle the situation whenever a bullet hits any enemy
+    // just mark the m_alive of enemy = 0, whenever bullet hits it
+
+    for(auto &enemy : m_entities.getEntityMap()["enemy"])
+    {
+        float x1 = enemy -> cTransform -> position.x;
+        float y1 = enemy -> cTransform -> position.y;
+        float r1 = enemy -> cShape -> shape.getRadius();
+        for(auto &bullet : m_entities.getEntityMap()["bullet"])
+        {
+            float x2 = bullet -> cTransform -> position.x;
+            float y2 = bullet -> cTransform -> position.y;
+            float r2 = bullet -> cShape -> shape.getRadius();
+            float dist = (x1 - x2) * (x1 - x2) + (y1 - y2)*(y1 - y2);
+            if(dist <= (r1 + r2)*(r1 + r2))
+            {
+                // collision detected
+                // remove this enemy and break out of this enemy loop
+                enemy -> destroy();
+                break;
+            }
+        }
     }
 
 }

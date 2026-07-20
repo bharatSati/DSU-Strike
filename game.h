@@ -93,7 +93,7 @@ public:
     void spawnPlayer ();
     void spawnBullet (std::shared_ptr<Entity> &e, Vec2 &target);
     void spawnEnemy ();
-    void spawnsmallEnemey ();
+    void spawnSmallEnemy ();
     
 
 };
