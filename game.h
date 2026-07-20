@@ -78,8 +78,8 @@ class Game
 
     void sMovement ();
     void sUserInput ();
-    void sBulletSpawner ();
-    void sLifespan ();
+    void sBulletSpawner (std::shared_ptr<Entity> &e, Vec2 &target);
+    void sLifespan (const std::string &tag);
     void sRender ();
     void sEnemySpawner ();
     void sSmallEnemySpawner (std::shared_ptr<Entity> &enemy);
@@ -92,7 +92,7 @@ public:
 
     void run ();
     void spawnPlayer ();
-    void spawnBullet (std::shared_ptr<Entity> &e, Vec2 &target);
+    void spawnBullet ();
     void spawnEnemy ();
     void spawnSmallEnemy ();
     
