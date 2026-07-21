@@ -18,7 +18,7 @@ void Game::init (const std::string &config)
     std::ifstream file(config);
 
     std::string type;
-    float width,height;
+    unsigned int width,height;
     float fps,fullScreen;
 
     // reading window details
@@ -100,6 +100,32 @@ void Game::init (const std::string &config)
 
     m_window.setFramerateLimit(fps);
 
+
+    
+
+    file >> type;
+    if(type == "Text")
+    {
+        float px,py;
+        int size,r,g,b;
+        file >> px >> py >> size >> r >> g >> b;
+        
+        if(!m_font.openFromFile("assets/fonts/font1.ttf"))
+        {
+            std::cout << "Font cant be loaded" << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
+        // make object out of it
+        m_text.emplace(m_font);
+
+        // then use it properties
+        m_text -> setStyle(sf::Text::Bold);
+        m_text -> setPosition({ px , py });
+        m_text -> setCharacterSize(size);
+        m_text -> setFillColor(sf::Color(r,g,b));
+        m_text -> setString("SCORE : 0");
+    }
+
 }
 
 
@@ -111,16 +137,22 @@ void Game::run()
     {
         m_entities.update();
 
+        if(!m_paused)
+        {
+            sEnemySpawner();
+            sMovement();
+            sEnemySpawner();
+            sCollisions();
+            sLifespan("bullet");
+            sLifespan("smallenemy");
+
+        }
    
-        sEnemySpawner();
         
         sUserInput();
-        sMovement();
-        sEnemySpawner();
-        sCollisions();
+        
+        
         sRender();
-        sLifespan("bullet");
-        sLifespan("smallenemy");
         m_currentFrame++;
     }
 }
@@ -136,7 +168,7 @@ void Game::spawnPlayer()
 
     e -> cTransform = std::make_shared<CTransform> (Vec2(cx, cy), Vec2(0, 0), 0.0f );
     e -> cShape = std::make_shared<CShape> (40 , 
-            sf::Color(m_playerConfig.FR ,m_playerConfig.FG ,m_playerConfig.FB) ,
+            sf::Color(m_playerConfig.FR ,m_playerConfig.FG ,m_playerConfig.FB , 0) ,
             m_playerConfig.V,
             sf::Color(m_playerConfig.OR, m_playerConfig.OG, m_playerConfig.OB), 
             m_playerConfig.OT
@@ -165,6 +197,8 @@ void Game::spawnEnemy()
 
     // randome speed b/w [smin , smax]
     int speed = rand () % (m_enemyConfig.sMax - m_enemyConfig.sMin + 1) + m_enemyConfig.sMin; // [sMin , ]
+    // std::cout << speed << std::endl;
+
 
     // random number of sides b/w [Vin , Vmax]
     int sides = rand () % (m_enemyConfig.Vmax - m_enemyConfig.Vmin + 1) + m_enemyConfig.Vmin;
@@ -361,16 +395,15 @@ void Game::sMovement ()
             float t = e -> cShape -> shape.getOutlineThickness();
             if( ( newX + r + t >= w) || ( newX - r - t <= 0 ) )
             {
-                e -> cTransform -> velocity.x = -1.0f * e -> cTransform -> velocity.x;
+                e -> cTransform -> velocity.x *= -1.0f;;
             } 
 
             if( ( newY + r + t >= h) || ( newY - r - t <= 0 ) )
             {
-                e -> cTransform -> velocity.y = -1.0f * e -> cTransform -> velocity.y;
+                e -> cTransform -> velocity.y *= -1.0f;
             } 
 
         }
-
 
         // setting the new positions every time 
         e -> cTransform -> position = { newX , newY };
@@ -399,6 +432,8 @@ void Game::sCollisions ()
         {
             // collision detected between player and enemy
             // remove current player and sspawn it again
+            m_score = 0;
+            m_text -> setString("SCORE : " + std::to_string(m_score));
             m_player -> destroy();
             spawnPlayer();
             break;
@@ -427,6 +462,8 @@ void Game::sCollisions ()
             {
                 // collision detected
                 // remove this enemy and break out of this enemy loop
+                m_score += 1;
+                m_text -> setString("SCORE : " + std::to_string(m_score));
                 sSmallEnemySpawner(enemy);
                 break;
             }
@@ -457,6 +494,8 @@ void Game::sRender()
         m_window.draw(e -> cShape -> shape);
     }
 
+    m_window.draw(*m_text);
+
     m_window.display();
 
 }
@@ -479,6 +518,10 @@ void Game::sUserInput ()
         {
             m_window.close();
             m_running = 0;
+        }
+        if(key && key -> code == sf::Keyboard::Key::P)
+        {
+            m_paused = 1 - m_paused;
         }
         if(key && key -> code == sf::Keyboard::Key::Up)
         {

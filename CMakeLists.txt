@@ -23,9 +23,9 @@ target_link_libraries(dsu_strike PRIVATE
     SFML::Audio
 )
 
-# Copy config.txt to build folder after every build
+# Coping assets to build folder after every build
 add_custom_command(TARGET dsu_strike POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_SOURCE_DIR}/config.txt
-        $<TARGET_FILE_DIR:dsu_strike>/config.txt
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:dsu_strike>/assets
 )

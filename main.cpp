@@ -15,7 +15,7 @@ int main() {
     // std::cout << vec.size() << std::endl;
     // for(auto it : vec) std::cout << it -> tag() << std::endl;
 
-    Game g("config.txt");
+    Game g("assets/config.txt");
     g.run();
 
 
