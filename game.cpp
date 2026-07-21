@@ -14,74 +14,91 @@ Game::Game (const std::string &config)
 
 void Game::init (const std::string &config)
 {
-    // // read the file 
-    // std::ifstream file(path);
+    // read the file 
+    std::ifstream file(config);
 
-    std::string name;
-    int width,height,fps,fullScreen = 0;
+    std::string type;
+    float width,height;
+    float fps,fullScreen;
 
-    // // reading window details
-    // file >> name >> width >> height >> fps >> fullScreen;
+    // reading window details
+    file >> type;
+    if(type == "Window")
+    {
+        file >> width >> height >> fps >> fullScreen;
+        std::cout << width << std::endl;
+    }
+    
+    file >> type;
+    if(type == "Player")
+    {
+        // reading player details
+        file >>
+        m_playerConfig.SR >> 
+        m_playerConfig.CR >> 
+        m_playerConfig.S >> 
+        m_playerConfig.FR >>
+        m_playerConfig.FG >> 
+        m_playerConfig.FB >> 
+        m_playerConfig.OR >>
+        m_playerConfig.OG >>
+        m_playerConfig.OB >> 
+        m_playerConfig.OT >> 
+        m_playerConfig.V;
+    }
 
-    // // reading player details
-    // file >> 
-    //     name >> 
-    //     m_playerConfig.SR >> 
-    //     m_playerConfig.CR >> 
-    //     m_playerConfig.S >> 
-    //     m_playerConfig.FR >>
-    //     m_playerConfig.FG >> 
-    //     m_playerConfig.FB >> 
-    //     m_playerConfig.OR >>
-    //     m_playerConfig.OG >>
-    //     m_playerConfig.OB >> 
-    //     m_playerConfig.OT >> 
-    //     m_playerConfig.V;
+    
+    file >> type;
+    if(type == "Enemy")
+    {
+        // reading enemy details
+        file >> 
+        m_enemyConfig.SR >>
+        m_enemyConfig.CR >> 
+        m_enemyConfig.sMin >> 
+        m_enemyConfig.sMax >> 
+        m_enemyConfig.OR >>
+        m_enemyConfig.OG >> 
+        m_enemyConfig.OB >>
+        m_enemyConfig.OT >> 
+        m_enemyConfig.Vmin >> 
+        m_enemyConfig.Vmax >> 
+        m_enemyConfig.L >> 
+        m_enemyConfig.SP;
+    }
 
-    // // reading enemy details
-    // file >> 
-    //     name >>
-    //     m_enemyConfig.SR >>
-    //     m_enemyConfig.CR >> 
-    //     m_enemyConfig.sMin >> 
-    //     m_enemyConfig.sMax >> 
-    //     m_enemyConfig.OR >>
-    //     m_enemyConfig.OG >> 
-    //     m_enemyConfig.OB >>
-    //     m_enemyConfig.OT >> 
-    //     m_enemyConfig.Vmin >> 
-    //     m_enemyConfig.Vmax >> 
-    //     m_enemyConfig.L >> 
-    //     m_enemyConfig.SP;
-
-    // // reading bullets details
-    // file >> 
-    //     name >>
-    //     m_bulletConfig.SR >>
-    //     m_bulletConfig.CR >> 
-    //     m_bulletConfig.S >> 
-    //     m_bulletConfig.FR >> 
-    //     m_bulletConfig.FG >> 
-    //     m_bulletConfig.FB >> 
-    //     m_bulletConfig.OR >>
-    //     m_bulletConfig.OG >> 
-    //     m_bulletConfig.OB >>
-    //     m_bulletConfig.OT >> 
-    //     m_bulletConfig.V >> 
-    //     m_bulletConfig.L;
+    
+    file >> type;
+    if(type == "Bullet")
+    {
+        // reading bullets details
+        file >>
+        m_bulletConfig.SR >>
+        m_bulletConfig.CR >> 
+        m_bulletConfig.S >> 
+        m_bulletConfig.FR >> 
+        m_bulletConfig.FG >> 
+        m_bulletConfig.FB >> 
+        m_bulletConfig.OR >>
+        m_bulletConfig.OG >> 
+        m_bulletConfig.OB >>
+        m_bulletConfig.OT >> 
+        m_bulletConfig.V >> 
+        m_bulletConfig.SP;
+    }
 
         
 
     if(fullScreen) m_window.create(
-        sf::VideoMode({1000 , 800}),
+        sf::VideoMode::getDesktopMode(),
         "DSU_Strike",
         sf::State::Fullscreen);
 
     else m_window.create(
-        sf::VideoMode({1000 , 800}),
+        sf::VideoMode({width , height}),
         "DSU_Strike");
 
-    m_window.setFramerateLimit(60);
+    m_window.setFramerateLimit(fps);
 
 }
 
@@ -118,7 +135,12 @@ void Game::spawnPlayer()
     float cy = m_window.getSize().y / 2.0f;
 
     e -> cTransform = std::make_shared<CTransform> (Vec2(cx, cy), Vec2(0, 0), 0.0f );
-    e -> cShape = std::make_shared<CShape> (40, sf::Color(0,0,0), 8, sf::Color(255,255,255), 5);
+    e -> cShape = std::make_shared<CShape> (40 , 
+            sf::Color(m_playerConfig.FR ,m_playerConfig.FG ,m_playerConfig.FB) ,
+            m_playerConfig.V,
+            sf::Color(m_playerConfig.OR, m_playerConfig.OG, m_playerConfig.OB), 
+            m_playerConfig.OT
+        );
     e -> cInput = std::make_shared<CInput> ();
     m_player = e;
    
@@ -128,7 +150,7 @@ void Game::spawnPlayer()
 
 void Game::sEnemySpawner ()
 {
-    if(m_currentFrame - m_lastEnemySpawnTime >= 240) spawnEnemy();
+    if(m_currentFrame - m_lastEnemySpawnTime >= m_enemyConfig.SP) spawnEnemy();
 }
 
 void Game::spawnEnemy()
@@ -137,19 +159,37 @@ void Game::spawnEnemy()
     int cx = m_window.getSize().x;
     int cy = m_window.getSize().y;
 
+    int r = m_playerConfig.SR, t = m_playerConfig.CR;
+    float px = rand() % (cx - 2*r) + r;  // px = [r,cx - r]
+    float py = rand() % (cy - 2*r) + r;  // py = [r, cy - r]
 
-    float px = rand() % (cx - 100) + 50;
-    float py = rand() % (cy - 100) + 50;
+    // randome speed b/w [smin , smax]
+    int speed = rand () % (m_enemyConfig.sMax - m_enemyConfig.sMin + 1) + m_enemyConfig.sMin; // [sMin , ]
 
-    // give it a random angle
+    // random number of sides b/w [Vin , Vmax]
+    int sides = rand () % (m_enemyConfig.Vmax - m_enemyConfig.Vmin + 1) + m_enemyConfig.Vmin;
+
+    // random fill color 
+    int FR = rand() % 136 + 80;   // inside red = [80 - 215]
+    int FG = rand() % 136 + 80;   // inside green = [80 - 215]
+    int FB = rand() % 136 + 80;   // inside blue [80 - 215]
+
+    // give it a random angle of projection
     float angle = rand() % (360) + 1;
+
     float pi = 3.140;
     angle = (angle * pi)/180;
-    float vx = 5 * std::cos(angle);
-    float vy = 5 * std::sin(angle);
+    float vx = speed * std::cos(angle);
+    float vy = speed * std::sin(angle);
 
     e -> cTransform = std::make_shared<CTransform> (Vec2(px, py), Vec2(vx,vy), 0.0f );
-    e -> cShape = std::make_shared<CShape> (50, sf::Color(255,255,255), 3, sf::Color(220,220,220), 12);
+    e -> cShape = std::make_shared<CShape> (
+            m_enemyConfig.SR , // r
+            sf::Color(FR , FG , FB) , // fill color
+            sides , // number of sides
+            sf::Color(m_enemyConfig.OR , m_enemyConfig.OG , m_enemyConfig.OB), // outline color
+            m_enemyConfig.OT  // outline thickness
+        );
 
     // no input component needed for enemy
 
@@ -167,12 +207,18 @@ void Game::sBulletSpawner(std::shared_ptr<Entity> &source, Vec2 &target)
     // then multiply the magnitude of speed to it
     auto e = m_entities.addEntity("bullet");
     Vec2 vel = target - source -> cTransform -> position;
-    vel.normalize().scale(25);
+    vel.normalize().scale(m_bulletConfig.S);
 
     e -> cTransform = std::make_shared<CTransform> (source -> cTransform -> position , vel , 0.0);
-    e -> cShape = std::make_shared<CShape> (15, sf::Color(255,255,255), 20, sf::Color(220,220,220), 1);
+    e -> cShape = std::make_shared<CShape> (
+            m_bulletConfig.SR , // r
+            sf::Color(m_bulletConfig.FR ,m_bulletConfig.FG , m_bulletConfig.FB) , // f color
+            m_bulletConfig.V , // number of sides
+            sf::Color(m_bulletConfig.OR ,m_bulletConfig.OG , m_bulletConfig.OB), // o color
+            m_bulletConfig.OT // o thickness
+        );
     // for bullet we need to it to fade out and thus remove after some number of frame
-    e -> cLifespan = std::make_shared<CLifespan> (20);
+    e -> cLifespan = std::make_shared<CLifespan> (m_bulletConfig.SP);
 
 }
 
@@ -202,8 +248,8 @@ void Game::sSmallEnemySpawner (std::shared_ptr<Entity> &enemy)
     float temp = 0;
     for(int i = 1; i <= sides; i++)
     {
-        float vx = std::cos( (pi * temp)/180 * speed );
-        float vy = std::sin( (pi * temp)/180 * speed );
+        float vx = speed * std::cos( (pi * temp)/180 );
+        float vy = speed * std::sin( (pi * temp)/180 );
         auto e = m_entities.addEntity("smallenemy");
         e -> cTransform = std::make_shared<CTransform> (
             enemy -> cTransform -> position,
@@ -219,7 +265,7 @@ void Game::sSmallEnemySpawner (std::shared_ptr<Entity> &enemy)
             t
         );
 
-        e -> cLifespan = std::make_shared<CLifespan> (120);
+        e -> cLifespan = std::make_shared<CLifespan> (m_enemyConfig.L);
 
         temp += baseAngle;
     }
@@ -275,19 +321,19 @@ void Game::sMovement ()
     // handle input instructions
     if(m_player -> cInput -> up)
     {
-        m_player -> cTransform -> velocity.y = -5;
+        m_player -> cTransform -> velocity.y = -1*m_playerConfig.S;
     }
     if(m_player -> cInput -> down)
     {
-        m_player -> cTransform -> velocity.y = 5;
+        m_player -> cTransform -> velocity.y = m_playerConfig.S;
     }
     if(m_player -> cInput -> left)
     {
-        m_player -> cTransform -> velocity.x = -5;
+        m_player -> cTransform -> velocity.x = -1*m_playerConfig.S;
     }
     if(m_player -> cInput -> right)
     {
-        m_player -> cTransform -> velocity.x = 5;
+        m_player -> cTransform -> velocity.x = m_playerConfig.S;
     }
 
     // if goes out of bound handle it
@@ -303,8 +349,6 @@ void Game::sMovement ()
 
     m_player -> cTransform -> position = { nx , ny };
     
-   
-
 
     for(auto &e : m_entities.getEntities())
     {
@@ -399,16 +443,18 @@ void Game::sRender()
     m_window.clear();
 
     // render player
-    m_player->cShape->shape.setPosition( { m_player->cTransform->position.x, m_player->cTransform->position.y } );
-    m_player->cTransform->angle += 1.0f;
-    m_player->cShape->shape.setRotation(sf::degrees(m_player->cTransform->angle));
-    m_window.draw(m_player->cShape->shape);
+    m_player -> cShape -> shape.setPosition( { 
+                m_player -> cTransform -> position.x, 
+                m_player -> cTransform -> position.y } );
+    m_player -> cTransform -> angle += 1.0f;
+    m_player -> cShape -> shape.setRotation(sf::degrees(m_player -> cTransform -> angle));
+    m_window.draw(m_player -> cShape -> shape);
 
     for(auto &e : m_entities.getEntities())
     {
-        e->cTransform->angle += 1.0f;
-        e->cShape->shape.setRotation(sf::degrees(e->cTransform->angle)); 
-        m_window.draw(e->cShape->shape);
+        e -> cTransform -> angle += 1.0f;
+        e -> cShape -> shape.setRotation(sf::degrees(e -> cTransform -> angle)); 
+        m_window.draw(e -> cShape -> shape);
     }
 
     m_window.display();

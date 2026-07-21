@@ -7,8 +7,8 @@
 // data structures / structures to read data from configuration file
 struct PlayerConfig
 {
-    int SR; // shape radious
-    int CR; // collision radious
+    float SR; // shape radious
+    float CR; // collision radious
     float S; // speed
     int FR; // fill color : red
     int FG; // fill color : green
@@ -16,20 +16,20 @@ struct PlayerConfig
     int OR; // fill outline color : red
     int OG; // fill ouline color : green 
     int OB; // fill outline color : blue
-    int OT; // outline thickness
+    float OT; // outline thickness
     int V; // number of sides
 };
 
 struct EnemyConfig
 {
-    int SR; // shape radious
-    int CR; // collision radious
+    float SR; // shape radious
+    float CR; // collision radious
     int sMin; // min speed
     int sMax; // max speed
     int OR; // fill outline color : red
     int OG; // fill ouline color : green 
     int OB; // fill outline color : blue
-    int OT; // outline thickness
+    float OT; // outline thickness
     int Vmin; // min number of sides
     int Vmax; // min number of sides
     int L; // clones lifespan
@@ -39,8 +39,8 @@ struct EnemyConfig
 
 struct  BulletConfig
 {
-    int SR; // shape radious
-    int CR; // collision radious
+    float SR; // shape radious
+    float CR; // collision radious
     float S; // speed
     int FR; // fill color : red
     int FG; // fill color : green
@@ -48,9 +48,9 @@ struct  BulletConfig
     int OR; // fill outline color : red
     int OG; // fill ouline color : green 
     int OB; // fill outline color : blue
-    int OT; // outline thickness
+    float OT; // outline thickness
     int V; // number of sides
-    int L; // bullet lifespan
+    int SP; // bullet lifespan
 };
 
 
